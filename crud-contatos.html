@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRUD de Contatos</title>
+
+  <style>
+    /* ====================== ESTILO (CSS) ====================== */
+    :root {
+      --azul: #2563eb;
+      --azul-escuro: #1e40af;
+      --cinza-fundo: #f4f5f7;
+      --cinza-borda: #d9dce1;
+      --texto: #1f2430;
+      --vermelho: #dc2626;
+      --verde: #16a34a;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: var(--cinza-fundo);
+      color: var(--texto);
+      line-height: 1.5;
+      padding: 24px;
+    }
+
+    .container { max-width: 720px; margin: 0 auto; }
+
+    h1 { font-size: 1.6rem; margin-bottom: 4px; }
+    .subtitulo { color: #6b7280; margin-bottom: 24px; font-size: 0.95rem; }
+
+    .cartao {
+      background: #fff;
+      border: 1px solid var(--cinza-borda);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    /* --- Formulário --- */
+    .campo { margin-bottom: 14px; }
+    label { display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; }
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--cinza-borda);
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    input:focus { outline: 2px solid var(--azul); border-color: var(--azul); }
+
+    .botoes { display: flex; gap: 8px; margin-top: 8px; }
+
+    button {
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+    .btn-principal { background: var(--azul); color: #fff; }
+    .btn-principal:hover { background: var(--azul-escuro); }
+    .btn-cancelar { background: #e5e7eb; color: var(--texto); display: none; }
+
+    /* --- Tabela --- */
+    table { width: 100%; border-collapse: collapse; }
+    th, td { text-align: left; padding: 10px; border-bottom: 1px solid var(--cinza-borda); }
+    th { font-size: 0.8rem; text-transform: uppercase; color: #6b7280; }
+    td .acoes { display: flex; gap: 6px; }
+    .btn-mini { padding: 5px 10px; font-size: 0.8rem; }
+    .btn-editar { background: #fef3c7; color: #92400e; }
+    .btn-excluir { background: #fee2e2; color: var(--vermelho); }
+
+    .vazio { text-align: center; color: #9ca3af; padding: 24px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Contatos</h1>
+    <p class="subtitulo">Exemplo de CRUD: adicionar, listar, editar e excluir.</p>
+
+    <!-- ====================== FORMULÁRIO ====================== -->
+    <div class="cartao">
+      <div class="campo">
+        <label for="nome">Nome</label>
+        <input type="text" id="nome" placeholder="Ex: Maria Silva">
+      </div>
+      <div class="campo">
+        <label for="email">E-mail</label>
+        <input type="email" id="email" placeholder="Ex: maria@email.com">
+      </div>
+      <div class="campo">
+        <label for="telefone">Telefone</label>
+        <input type="text" id="telefone" placeholder="Ex: (11) 99999-9999">
+      </div>
+      <div class="botoes">
+        <button class="btn-principal" id="btnSalvar" onclick="salvar()">Adicionar</button>
+        <button class="btn-cancelar" id="btnCancelar" onclick="cancelarEdicao()">Cancelar</button>
+      </div>
+    </div>
+
+    <!-- ====================== LISTA ====================== -->
+    <div class="cartao">
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>E-mail</th>
+            <th>Telefone</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="corpoTabela"></tbody>
+      </table>
+      <div class="vazio" id="mensagemVazia">Nenhum contato ainda. Adicione o primeiro acima.</div>
+    </div>
+  </div>
+
+  <script>
+    /* ====================== LÓGICA (JavaScript) ====================== */
+
+    // Aqui ficam os dados. É só um array na memória.
+    // (Quando você recarrega a página, ele volta a zero. No final tem uma dica pra salvar de verdade.)
+    let contatos = [];
+
+    // Controla se estamos EDITANDO. Guarda o id do contato em edição, ou null se for um novo.
+    let idEmEdicao = null;
+
+    // Gera um id único simples pra cada contato.
+    let proximoId = 1;
+
+    // Pega os elementos da tela uma vez só, pra reutilizar.
+    const inputNome = document.getElementById("nome");
+    const inputEmail = document.getElementById("email");
+    const inputTelefone = document.getElementById("telefone");
+    const corpoTabela = document.getElementById("corpoTabela");
+    const mensagemVazia = document.getElementById("mensagemVazia");
+    const btnSalvar = document.getElementById("btnSalvar");
+    const btnCancelar = document.getElementById("btnCancelar");
+
+    // ---------- CREATE / UPDATE (o mesmo botão faz os dois) ----------
+    function salvar() {
+      const nome = inputNome.value.trim();
+      const email = inputEmail.value.trim();
+      const telefone = inputTelefone.value.trim();
+
+      // Validação simples: nome é obrigatório.
+      if (nome === "") {
+        alert("Por favor, preencha o nome.");
+        return;
+      }
+
+      if (idEmEdicao === null) {
+        // CREATE: adiciona um contato novo ao array.
+        contatos.push({ id: proximoId, nome, email, telefone });
+        proximoId++;
+      } else {
+        // UPDATE: encontra o contato pelo id e atualiza os campos.
+        const contato = contatos.find(c => c.id === idEmEdicao);
+        contato.nome = nome;
+        contato.email = email;
+        contato.telefone = telefone;
+        cancelarEdicao(); // volta o botão pro modo "Adicionar"
+      }
+
+      limparFormulario();
+      renderizar();
+    }
+
+    // ---------- READ (desenha a lista na tela) ----------
+    function renderizar() {
+      corpoTabela.innerHTML = ""; // limpa a tabela antes de redesenhar
+
+      // Mostra ou esconde a mensagem de "lista vazia".
+      mensagemVazia.style.display = contatos.length === 0 ? "block" : "none";
+
+      // Para cada contato, cria uma linha da tabela.
+      contatos.forEach(contato => {
+        const linha = document.createElement("tr");
+        linha.innerHTML = `
+          <td>${contato.nome}</td>
+          <td>${contato.email || "—"}</td>
+          <td>${contato.telefone || "—"}</td>
+          <td>
+            <div class="acoes">
+              <button class="btn-mini btn-editar" onclick="editar(${contato.id})">Editar</button>
+              <button class="btn-mini btn-excluir" onclick="excluir(${contato.id})">Excluir</button>
+            </div>
+          </td>
+        `;
+        corpoTabela.appendChild(linha);
+      });
+    }
+
+    // ---------- Preparar UPDATE (joga os dados de volta no formulário) ----------
+    function editar(id) {
+      const contato = contatos.find(c => c.id === id);
+      inputNome.value = contato.nome;
+      inputEmail.value = contato.email;
+      inputTelefone.value = contato.telefone;
+
+      idEmEdicao = id;
+      btnSalvar.textContent = "Salvar alterações";
+      btnCancelar.style.display = "inline-block";
+      inputNome.focus();
+    }
+
+    function cancelarEdicao() {
+      idEmEdicao = null;
+      btnSalvar.textContent = "Adicionar";
+      btnCancelar.style.display = "none";
+      limparFormulario();
+    }
+
+    // ---------- DELETE ----------
+    function excluir(id) {
+      if (!confirm("Tem certeza que deseja excluir este contato?")) return;
+      // Mantém no array todos, MENOS o que tem esse id.
+      contatos = contatos.filter(c => c.id !== id);
+      renderizar();
+    }
+
+    // ---------- Auxiliar ----------
+    function limparFormulario() {
+      inputNome.value = "";
+      inputEmail.value = "";
+      inputTelefone.value = "";
+    }
+
+    // Desenha a tela pela primeira vez (começa vazia).
+    renderizar();
+  </script>
+</body>
+</html>
