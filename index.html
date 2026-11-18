@@ -1,146 +1,168 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Portal de Acesso</title>
-
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
-            color: #333;
-        }
-
-        header {
-            background-color: #1f3a5f;
-            color: white;
-            padding: 25px;
-            text-align: center;
-        }
-
-        nav {
-            background-color: #162b47;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        nav a {
-            color: white;
-            text-decoration: none;
-            padding: 16px 22px;
-            display: block;
-            transition: background-color 0.3s;
-        }
-
-        nav a:hover {
-            background-color: #2d5988;
-        }
-
-        main {
-            max-width: 1100px;
-            margin: 40px auto;
-            padding: 20px;
-        }
-
-        h2 {
-            margin-bottom: 15px;
-        }
-
-        .cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 20px;
-            margin-top: 25px;
-        }
-
-        .card {
-            background-color: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-            text-align: center;
-        }
-
-        .card h3 {
-            margin-bottom: 15px;
-            color: #1f3a5f;
-        }
-
-        .card p {
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-
-        .botao {
-            display: inline-block;
-            background-color: #1f3a5f;
-            color: white;
-            text-decoration: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-        }
-
-        .botao:hover {
-            background-color: #2d5988;
-        }
-
-        footer {
-            background-color: #162b47;
-            color: white;
-            text-align: center;
-            padding: 20px;
-            margin-top: 50px;
-        }
-
-        @media (max-width: 600px) {
-            nav {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            main {
-                margin: 20px auto;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRUD de Contatos</title>
+  <link rel="stylesheet" href="css/index.css">
 </head>
 
 <body>
+  <div class="container">
+    <h1>Contatos</h1>
+    <p class="subtitulo">Exemplo de CRUD: adicionar, listar, editar e excluir.</p>
 
-    <header>
-        <h1>Meu Portal</h1>
-        <p>Portal de acesso às páginas e aos projetos</p>
-    </header>
+    <!-- ====================== FORMULÁRIO ====================== -->
+    <div class="cartao">
+      <div class="campo">
+        <label for="nome">Nome</label>
+        <input type="text" id="nome" placeholder="Ex: Maria Silva">
+      </div>
+      <div class="campo">
+        <label for="email">E-mail</label>
+        <input type="email" id="email" placeholder="Ex: maria@email.com">
+      </div>
+      <div class="campo">
+        <label for="telefone">Telefone</label>
+        <input type="text" id="telefone" placeholder="Ex: (11) 99999-9999">
+      </div>
+      <div class="botoes">
+        <button class="btn-principal" id="btnSalvar" onclick="salvar()">Adicionar</button>
+        <button class="btn-cancelar" id="btnCancelar" onclick="cancelarEdicao()">Cancelar</button>
+      </div>
+    </div>
 
-    <nav>
-        <a href="index.html">Início</a>
-        <a href="contatos.html">Contatos</a>
-        <a href="joao.html">Joao</a>
-        <a href="susane.html">Suzane</a>
-        <a href="mikaelly.html">Mikaelly</a>
-        <a href="pedro.html">Pedro</a>
-        <a href="carlos.html">Carlos</a>
-        <a href="carloscruz.html">Carlos Cruz</a>
-        <a href="kaike.html">kaike</a>
-    </nav>
+    <!-- ====================== LISTA ====================== -->
+    <div class="cartao">
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>E-mail</th>
+            <th>Telefone</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="corpoTabela"></tbody>
+      </table>
+      <div class="vazio" id="mensagemVazia">Nenhum contato ainda. Adicione o primeiro acima.</div>
+    </div>
+  </div>
 
-    <main>
-        <h2>Bem-vindo ao meu primeiro portal!</h2>
-    </main>
+  <script>
+    /* ====================== LÓGICA (JavaScript) ====================== */
 
-    <footer>
-        <p>&copy; 2026 - 2027 - Meu Portal</p>
-    </footer>
+    // Aqui ficam os dados. É só um array na memória.
+    // (Quando você recarrega a página, ele volta a zero. No final tem uma dica pra salvar de verdade.)
+    let contatos = [];
 
+    // Controla se estamos EDITANDO. Guarda o id do contato em edição, ou null se for um novo.
+    let idEmEdicao = null;
+
+    // Gera um id único simples pra cada contato.
+    let proximoId = 1;
+
+    // Pega os elementos da tela uma vez só, pra reutilizar.
+    const inputNome = document.getElementById("nome");
+    const inputEmail = document.getElementById("email");
+    const inputTelefone = document.getElementById("telefone");
+    const corpoTabela = document.getElementById("corpoTabela");
+    const mensagemVazia = document.getElementById("mensagemVazia");
+    const btnSalvar = document.getElementById("btnSalvar");
+    const btnCancelar = document.getElementById("btnCancelar");
+
+    // ---------- CREATE / UPDATE (o mesmo botão faz os dois) ----------
+    function salvar() {
+      const nome = inputNome.value.trim();
+      const email = inputEmail.value.trim();
+      const telefone = inputTelefone.value.trim();
+
+      // Validação simples: nome é obrigatório.
+      if (nome === "") {
+        alert("Por favor, preencha o nome.");
+        return;
+      }
+
+      if (idEmEdicao === null) {
+        // CREATE: adiciona um contato novo ao array.
+        contatos.push({ id: proximoId, nome, email, telefone });
+        proximoId++;
+      } else {
+        // UPDATE: encontra o contato pelo id e atualiza os campos.
+        const contato = contatos.find(c => c.id === idEmEdicao);
+        contato.nome = nome;
+        contato.email = email;
+        contato.telefone = telefone;
+        cancelarEdicao(); // volta o botão pro modo "Adicionar"
+      }
+
+      limparFormulario();
+      renderizar();
+    }
+
+    // ---------- READ (desenha a lista na tela) ----------
+    function renderizar() {
+      corpoTabela.innerHTML = ""; // limpa a tabela antes de redesenhar
+
+      // Mostra ou esconde a mensagem de "lista vazia".
+      mensagemVazia.style.display = contatos.length === 0 ? "block" : "none";
+
+      // Para cada contato, cria uma linha da tabela.
+      contatos.forEach(contato => {
+        const linha = document.createElement("tr");
+        linha.innerHTML = `
+          <td>${contato.nome}</td>
+          <td>${contato.email || "—"}</td>
+          <td>${contato.telefone || "—"}</td>
+          <td>
+            <div class="acoes">
+              <button class="btn-mini btn-editar" onclick="editar(${contato.id})">Editar</button>
+              <button class="btn-mini btn-excluir" onclick="excluir(${contato.id})">Excluir</button>
+            </div>
+          </td>
+        `;
+        corpoTabela.appendChild(linha);
+      });
+    }
+
+    // ---------- Preparar UPDATE (joga os dados de volta no formulário) ----------
+    function editar(id) {
+      const contato = contatos.find(c => c.id === id);
+      inputNome.value = contato.nome;
+      inputEmail.value = contato.email;
+      inputTelefone.value = contato.telefone;
+
+      idEmEdicao = id;
+      btnSalvar.textContent = "Salvar alterações";
+      btnCancelar.style.display = "inline-block";
+      inputNome.focus();
+    }
+
+    function cancelarEdicao() {
+      idEmEdicao = null;
+      btnSalvar.textContent = "Adicionar";
+      btnCancelar.style.display = "none";
+      limparFormulario();
+    }
+
+    // ---------- DELETE ----------
+    function excluir(id) {
+      if (!confirm("Tem certeza que deseja excluir este contato?")) return;
+      // Mantém no array todos, MENOS o que tem esse id.
+      contatos = contatos.filter(c => c.id !== id);
+      renderizar();
+    }
+
+    // ---------- Auxiliar ----------
+    function limparFormulario() {
+      inputNome.value = "";
+      inputEmail.value = "";
+      inputTelefone.value = "";
+    }
+
+    // Desenha a tela pela primeira vez (começa vazia).
+    renderizar();
+  </script>
 </body>
 </html>
 ```
