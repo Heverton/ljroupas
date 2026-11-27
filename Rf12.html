@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nova Venda | Meu Negócio</title>
+<link rel="stylesheet" href="css/Rf12.css">
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><div class="brand-icon">▣</div><div><strong>Meu Negócio</strong><small>Sistema de Vendas</small></div></div>
+  <nav class="nav">
+    <a href="#" onclick="return false"><span>⌂</span>Início</a><a class="active" href="#" onclick="return false"><span>🛒</span>Vendas</a>
+    <a href="#" onclick="return false"><span>♙</span>Clientes</a><a href="#" onclick="return false"><span>♧</span>Funcionários</a>
+    <a href="#" onclick="return false"><span>⬡</span>Produtos</a><a href="#" onclick="return false"><span>▥</span>Relatórios</a><a href="#" onclick="return false"><span>⚙</span>Configurações</a>
+  </nav><div class="sidebar-foot"><b>♥</b>Juntos por<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;um melhor amanhã!</div>
+</aside>
+<header class="topbar"><span class="top-icon">♧</span><div class="admin"><div class="avatar">♙</div>Administrador　⌄</div></header>
+<main>
+<section class="left">
+  <div class="page-head"><button class="back" aria-label="Voltar" onclick="showToast('Você está na tela de Nova Venda.')">‹</button><div><h1>Nova Venda</h1><p>Registre uma nova venda vinculando a um cliente e a um funcionário.</p></div></div>
+  <section class="panel">
+    <h2 class="panel-title"><span class="ico">▤</span>Dados da Venda</h2>
+    <div class="fields">
+      <div class="field"><label for="saleId">Nº da Venda</label><input id="saleId" value="000124" readonly><small>(gerado automaticamente)</small></div>
+      <div class="field"><label for="saleDate">Data da Venda</label><input id="saleDate" type="datetime-local"><small>(padrão: data atual)</small></div>
+      <div class="field"><label for="payment">Forma de Pagamento</label><select id="payment"><option>PIX</option><option>Dinheiro</option><option>Cartão de Crédito</option><option>Cartão de Débito</option><option>Transferência</option></select></div>
+      <div class="field"><label for="discount">Desconto</label><div class="input-unit"><input id="discount" type="number" min="0" step=".01" value="0"><span>R$</span></div><small>(padrão: 0)</small></div>
+      <div class="field span2"><label for="status">Status</label><select id="status"><option>Concluída</option><option>Cancelada</option></select><small>(ou Cancelada)</small></div>
+    </div>
+  </section>
+  <section class="panel">
+    <h2 class="panel-title"><span class="ico">♙</span>Cliente</h2>
+    <div class="field"><label for="client">Cliente <span class="required">*</span></label><div class="search-select"><span class="search-ico">⌕</span><input id="client" list="clients" placeholder="Selecione um cliente..." autocomplete="off"><datalist id="clients"><option value="Ana Oliveira"><option value="Bruno Santos"><option value="Carla Mendes"><option value="Daniel Costa"><option value="Cliente balcão"></datalist></div></div>
+  </section>
+  <section class="panel">
+    <h2 class="panel-title"><span class="ico">♧</span>Funcionário</h2>
+    <div class="field"><label for="employee">Funcionário <span class="required">*</span></label><div class="search-select"><span class="search-ico">⌕</span><input id="employee" list="employees" placeholder="Selecione um funcionário..." autocomplete="off"><datalist id="employees"><option value="Mariana Lima"><option value="Pedro Almeida"><option value="Rafael Souza"><option value="Juliana Rocha"></datalist></div></div>
+  </section>
+  <section class="panel items-panel">
+    <h2 class="panel-title"><span class="ico">⬡</span>Itens da Venda</h2>
+    <div class="add-row"><input class="searchbox" id="productSearch" list="products" placeholder="⌕  Buscar produto (nome, código ou variação)..."><datalist id="products"><option value="Tênis Casual"><option value="Camiseta Básica"><option value="Calça Jeans"><option value="Mochila Urbana"><option value="Boné Clássico"><option value="Meia Esportiva"></datalist><button class="primary" onclick="addProduct()">⊕　Adicionar Item</button></div>
+    <div class="table-wrap"><table><thead><tr><th>Produto / Variação</th><th>Qtd.</th><th>Preço Unitário</th><th>Subtotal</th><th>Ações</th></tr></thead><tbody id="items"></tbody></table></div>
+    <div class="info">ⓘ　O subtotal de cada item é calculado automaticamente (quantidade × preço unitário).</div>
+  </section>
+</section>
+<aside class="right">
+  <section class="summary">
+    <h2 class="panel-title"><span class="ico">▤</span>Resumo da Venda</h2>
+    <div class="sumline"><span>Itens</span><strong id="itemCount">0</strong></div>
+    <div class="sumline"><span>Subtotal</span><strong id="subtotal">R$ 0,00</strong></div>
+    <div class="sumline"><span>Desconto</span><strong id="discountView">R$ 0,00</strong></div>
+    <div class="total"><span>Valor Total</span><strong id="total">R$ 0,00</strong></div>
+  </section>
+  <section class="payment">
+    <h2 class="panel-title"><span class="ico">▣</span>Pagamento</h2>
+    <label for="paymentMirror">Forma de pagamento</label><select id="paymentMirror"><option>PIX</option><option>Dinheiro</option><option>Cartão de Crédito</option><option>Cartão de Débito</option><option>Transferência</option></select>
+    <div class="pay-note"><span class="qr" id="payIcon">▦</span><div><strong id="payTitle">Pagamento via PIX</strong><small id="payStatus">Aguarde a confirmação...</small></div></div>
+  </section>
+  <div class="actions"><button class="primary" onclick="saveSale()">▣　Salvar Venda</button><button class="secondary" onclick="confirmCancel()">×　Cancelar</button></div>
+</aside>
+</main></div>
+<div class="toast" id="toast" role="status"></div>
+<div class="modal-backdrop" id="modal"><div class="modal"><h2>Cancelar venda?</h2><p>As informações preenchidas nesta tela serão descartadas.</p><div class="modal-actions"><button class="secondary" onclick="closeModal()">Continuar editando</button><button class="primary" onclick="resetSale()">Sim, cancelar</button></div></div></div>
+
+    <script src="js/Rf12.js"></script>
+
+</body>
+</html>
