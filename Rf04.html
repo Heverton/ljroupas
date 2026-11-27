@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RF04 – Validação de CPF/CNPJ Único</title>
+  <link rel="stylesheet" href="css/Rf04.css">
+</head>
+<body>
+  <header class="topo">
+    <div>
+      <p class="modulo">Módulo: Cadastro de Pessoas • RF04</p>
+      <h1>Cadastro de Pessoas</h1>
+    </div>
+    <button type="button" class="btn btn-primario" id="btnNovo">+ Novo Cadastro</button>
+  </header>
+
+  <main>
+    <!-- Abas de Entidade (Cliente, Funcionário, Fornecedor) -->
+    <nav class="abas" aria-label="Tipo de pessoa">
+      <button type="button" class="aba ativa" data-entidade="cliente">Clientes (CPF)</button>
+      <button type="button" class="aba" data-entidade="funcionario">Funcionários (CPF)</button>
+      <button type="button" class="aba" data-entidade="fornecedor">Fornecedores (CNPJ)</button>
+    </nav>
+
+    <!-- Filtros -->
+    <section class="filtros" aria-label="Filtros de busca">
+      <div class="campo">
+        <label for="filtroNome" id="labelFiltroNome">Nome</label>
+        <input type="search" id="filtroNome" placeholder="Buscar por nome...">
+      </div>
+      <div class="campo">
+        <label for="filtroDocumento" id="labelFiltroDocumento">CPF</label>
+        <input type="text" id="filtroDocumento" inputmode="numeric" placeholder="000.000.000-00">
+      </div>
+      <div class="campo">
+        <label for="filtroStatus">Status</label>
+        <select id="filtroStatus">
+          <option value="todos">Todos</option>
+          <option value="ativo">Ativos</option>
+          <option value="inativo">Inativos</option>
+        </select>
+      </div>
+    </section>
+
+    <p class="resumo" id="resumo" aria-live="polite"></p>
+
+    <!-- Tabela -->
+    <div class="tabela-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th id="colNome">Nome</th>
+            <th id="colDocumento">CPF (UNIQUE)</th>
+            <th>Status</th>
+            <th class="col-acoes">Ações</th>
+          </tr>
+        </thead>
+        <tbody id="corpoTabela"></tbody>
+      </table>
+      <p class="vazio" id="vazio" hidden>Nenhum registro encontrado para os filtros aplicados.</p>
+    </div>
+  </main>
+
+  <!-- Modal de Cadastro / Edição -->
+  <dialog id="dlgForm" aria-labelledby="tituloForm">
+    <form id="formPessoa" novalidate>
+      <h2 id="tituloForm">Novo Cadastro</h2>
+
+      <div class="alerta" id="alertaForm" role="alert" hidden></div>
+
+      <input type="hidden" id="registroId">
+      <input type="hidden" id="registroEntidade">
+
+      <fieldset>
+        <legend id="legendaEntidade">Dados do Cliente</legend>
+        <div class="grade">
+          <div class="campo span-2">
+            <label for="nome" id="labelNome">Nome *</label>
+            <input type="text" id="nome" maxlength="120" autocomplete="off" required>
+            <small class="erro" data-erro="nome"></small>
+          </div>
+
+          <div class="campo">
+            <label for="documento" id="labelDocumento">CPF *</label>
+            <input type="text" id="documento" inputmode="numeric" maxlength="14" placeholder="000.000.000-00" autocomplete="off" required>
+            <small class="erro" data-erro="documento"></small>
+            <small class="status-verificacao" id="statusVerificacao" aria-live="polite"></small>
+          </div>
+
+          <div class="campo">
+            <label for="ativo">Status</label>
+            <select id="ativo">
+              <option value="true">Ativo</option>
+              <option value="false">Inativo</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+
+      <div class="rodape-form">
+        <button type="button" class="btn" id="btnCancelar">Cancelar</button>
+        <button type="submit" class="btn btn-primario" id="btnSalvar">Salvar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="js/Rf04.js"></script>
+</body>
+</html>
